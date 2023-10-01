@@ -1,0 +1,4 @@
+run:
+  timeout: 5m
+  fix: true
+  go: '1.19'

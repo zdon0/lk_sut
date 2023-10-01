@@ -1,0 +1,78 @@
+definitions:
+  lk_sut_pkg_dto.UpdateUser:
+    properties:
+      login:
+        example: example@mail.com
+        type: string
+      new_password:
+        example: Password321
+        type: string
+      old_password:
+        example: Password123
+        type: string
+    type: object
+  lk_sut_pkg_dto.User:
+    properties:
+      login:
+        example: example@mail.com
+        type: string
+      password:
+        example: Password123
+        type: string
+    type: object
+info:
+  contact:
+    name: Maks Mikhaylov
+    url: https://t.me/don101
+  title: Lk SUT Autocomitter
+paths:
+  /api/v1/user:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: user info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/lk_sut_pkg_dto.User'
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete user
+      tags:
+      - User
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: user info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/lk_sut_pkg_dto.UpdateUser'
+      produces:
+      - application/json
+      responses: {}
+      summary: Update password
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/lk_sut_pkg_dto.User'
+      produces:
+      - application/json
+      responses: {}
+      summary: Add user
+      tags:
+      - User
+swagger: "2.0"

@@ -1,0 +1,118 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Lk SUT Autocomitter",
+        "contact": {
+            "name": "Maks Mikhaylov",
+            "url": "https://t.me/don101"
+        }
+    },
+    "paths": {
+        "/api/v1/user": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Add user",
+                "parameters": [
+                    {
+                        "description": "user info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.User"
+                        }
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete user",
+                "parameters": [
+                    {
+                        "description": "user info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.User"
+                        }
+                    }
+                ],
+                "responses": {}
+            },
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update password",
+                "parameters": [
+                    {
+                        "description": "user info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.UpdateUser"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "lk_sut_pkg_dto.UpdateUser": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "example": "example@mail.com"
+                },
+                "new_password": {
+                    "type": "string",
+                    "example": "Password321"
+                },
+                "old_password": {
+                    "type": "string",
+                    "example": "Password123"
+                }
+            }
+        },
+        "lk_sut_pkg_dto.User": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "example": "example@mail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "Password123"
+                }
+            }
+        }
+    }
+}
