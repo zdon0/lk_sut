@@ -1,4 +1,23 @@
 definitions:
+  lk_sut_pkg_dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+      result:
+        type: object
+    type: object
+  lk_sut_pkg_dto.SimpleOkResponse:
+    properties:
+      error:
+        type: object
+      result:
+        $ref: '#/definitions/lk_sut_pkg_dto.SimpleOkResult'
+    type: object
+  lk_sut_pkg_dto.SimpleOkResult:
+    properties:
+      status:
+        type: string
+    type: object
   lk_sut_pkg_dto.UpdateUser:
     properties:
       login:
@@ -24,7 +43,7 @@ info:
   contact:
     name: Maks Mikhaylov
     url: https://t.me/don101
-  title: Lk SUT Autocomitter
+  title: Lk SUT Autocommitter
 paths:
   /api/v1/user:
     delete:
@@ -39,7 +58,23 @@ paths:
           $ref: '#/definitions/lk_sut_pkg_dto.User'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.SimpleOkResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
       summary: Delete user
       tags:
       - User
@@ -55,7 +90,23 @@ paths:
           $ref: '#/definitions/lk_sut_pkg_dto.UpdateUser'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.SimpleOkResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
       summary: Update password
       tags:
       - User
@@ -71,7 +122,19 @@ paths:
           $ref: '#/definitions/lk_sut_pkg_dto.User'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.SimpleOkResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/lk_sut_pkg_dto.ErrorResponse'
       summary: Add user
       tags:
       - User

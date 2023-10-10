@@ -6,7 +6,7 @@ import (
 	"lk_sut/internal/domain"
 )
 
-const minPasswordLength = 8
+const minPasswordLength = 6
 
 func (i *Interactor) validateUser(user domain.User) error {
 	return validation.ValidateStruct(

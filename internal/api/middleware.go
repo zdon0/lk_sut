@@ -40,8 +40,12 @@ func defaultZapLogger(logger *zap.Logger, pathPrefixes ...string) gin.HandlerFun
 		}
 
 		if len(c.Errors) > 0 || c.IsAborted() || c.Writer.Status() >= 400 {
-			if len(c.Errors) > 0 {
-				fields = append(fields, zap.Strings("error", c.Errors.Errors()))
+			if len(c.Errors) == 1 {
+				fields = append(fields, zap.Error(c.Errors[0]))
+			}
+
+			if len(c.Errors) > 1 {
+				fields = append(fields, zap.Strings("errors", c.Errors.Errors()))
 			}
 
 			logger.Error("Gin Error", fields...)

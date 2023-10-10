@@ -10,7 +10,7 @@ import (
 
 type Worker struct {
 	scheduler         *gocron.Scheduler
-	schedulerInterval time.Duration
+	committerInterval time.Duration
 
 	logger *zap.Logger
 
@@ -26,7 +26,7 @@ func NewWorker(cfg config.Scheduler, lkSut LkSutCommitter, repo Repository, logg
 
 	return &Worker{
 		scheduler:         gocron.NewScheduler(time.UTC),
-		schedulerInterval: cfg.RepeatInterval,
+		committerInterval: cfg.CommitterInterval,
 		logger:            logger,
 		lkSut:             lkSut,
 		repo:              repo,
@@ -57,11 +57,28 @@ func (w *Worker) Stop() {
 		zap.String(actionField, "worker stopped"))
 }
 
-func (w *Worker) RegisterJob() error {
+func (w *Worker) RegisterJobs() error {
+	if err := w.registerCommitterJob(); err != nil {
+		return err
+	}
+
+	return w.registerFlusherJob()
+}
+
+func (w *Worker) registerCommitterJob() error {
 	_, err := w.scheduler.
-		Every(w.schedulerInterval).
+		Every(w.committerInterval).
 		SingletonMode().
 		Do(comitterFunc(w.lkSut, w.repo, w.logger), w.baseCtx)
+
+	return err
+}
+
+func (w *Worker) registerFlusherJob() error {
+	_, err := w.scheduler.
+		Every(1).Day().At("00:00").
+		SingletonMode().
+		Do(flusherFunc(w.repo, w.logger), w.baseCtx)
 
 	return err
 }

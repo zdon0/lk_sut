@@ -98,3 +98,7 @@ func (r *Repo) SetUserLastLogin(ctx context.Context, login string, timeToSet tim
 func (r *Repo) DeleteUserLastLogin(ctx context.Context, login string) error {
 	return r.rdb.HDel(ctx, r.userLastLoginHTable, login).Err()
 }
+
+func (r *Repo) FlushLastLogin(ctx context.Context) error {
+	return r.rdb.Del(ctx, r.userLastLoginHTable).Err()
+}

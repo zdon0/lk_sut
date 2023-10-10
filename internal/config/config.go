@@ -25,7 +25,7 @@ type LkSutService struct {
 }
 
 type Scheduler struct {
-	RepeatInterval time.Duration `env:"SCHEDULER_INTERVAL" envDefault:"3m"`
+	CommitterInterval time.Duration `env:"SCHEDULER_COMMIT_INTERVAL" envDefault:"3m"`
 }
 
 type Redis struct {

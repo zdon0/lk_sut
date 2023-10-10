@@ -19,6 +19,7 @@ type Repository interface {
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	GetUserLastLogin(ctx context.Context, login string) (time.Time, error)
 	SetUserLastLogin(ctx context.Context, login string, timeToSet time.Time) error
+	FlushLastLogin(ctx context.Context) error
 }
 
 func comitterFunc(lkSut LkSutCommitter, repo Repository, logger *zap.Logger) func(context.Context) {
@@ -101,5 +102,20 @@ func comitterFunc(lkSut LkSutCommitter, repo Repository, logger *zap.Logger) fun
 					zap.Error(err))
 			}
 		}
+	}
+}
+
+func flusherFunc(repo Repository, logger *zap.Logger) func(context.Context) {
+	return func(ctx context.Context) {
+		if err := repo.FlushLastLogin(ctx); err != nil {
+			logger.Error(workerMsg,
+				zap.String(actionField, "flush last login table"),
+				zap.Error(err))
+
+			return
+		}
+
+		logger.Debug(workerMsg,
+			zap.String(actionField, "flushed last login table"))
 	}
 }

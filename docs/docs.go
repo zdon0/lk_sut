@@ -41,7 +41,26 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.SimpleOkResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    }
+                }
             },
             "delete": {
                 "consumes": [
@@ -65,7 +84,32 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.SimpleOkResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    }
+                }
             },
             "patch": {
                 "consumes": [
@@ -89,11 +133,66 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.SimpleOkResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/lk_sut_pkg_dto.ErrorResponse"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
+        "lk_sut_pkg_dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "object"
+                }
+            }
+        },
+        "lk_sut_pkg_dto.SimpleOkResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "object"
+                },
+                "result": {
+                    "$ref": "#/definitions/lk_sut_pkg_dto.SimpleOkResult"
+                }
+            }
+        },
+        "lk_sut_pkg_dto.SimpleOkResult": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "lk_sut_pkg_dto.UpdateUser": {
             "type": "object",
             "properties": {
@@ -133,7 +232,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Lk SUT Autocomitter",
+	Title:            "Lk SUT Autocommitter",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

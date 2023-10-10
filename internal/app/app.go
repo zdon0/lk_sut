@@ -55,7 +55,7 @@ func Run() error {
 	workerLkSutClient := sutclient.NewClient(cfg.LkSutService)
 	lkSutClientWorker := worker.NewWorker(cfg.Scheduler, workerLkSutClient, userRepo, logger)
 
-	if err := lkSutClientWorker.RegisterJob(); err != nil {
+	if err := lkSutClientWorker.RegisterJobs(); err != nil {
 		return err
 	}
 

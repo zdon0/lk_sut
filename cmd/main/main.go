@@ -5,7 +5,7 @@ import (
 	"lk_sut/internal/app"
 )
 
-// @title           Lk SUT Autocomitter
+// @title           Lk SUT Autocommitter
 
 // @contact.name   	Maks Mikhaylov
 // @contact.url		https://t.me/don101
