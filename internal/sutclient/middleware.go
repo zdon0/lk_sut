@@ -1,9 +1,11 @@
 package sutclient
 
 import (
-	"github.com/go-resty/resty/v2"
-	"lk_sut/internal/pkg/decoder"
 	"net/http"
+
+	"github.com/go-resty/resty/v2"
+
+	"lk_sut/internal/pkg/decoder"
 )
 
 const (

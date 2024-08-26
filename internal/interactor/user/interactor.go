@@ -2,103 +2,57 @@ package user
 
 import (
 	"context"
-	"errors"
-	userdomain "lk_sut/internal/domain"
-	"lk_sut/internal/sutclient"
+
+	domainUser "lk_sut/internal/domain/user"
 )
 
 type Interactor struct {
-	repo userdomain.Repository
-	auth userdomain.Authorization
+	userBehavior *domainUser.Behavior
 }
 
-func NewInteractor(repo userdomain.Repository, auth userdomain.Authorization) *Interactor {
+func NewInteractor(userBehavior *domainUser.Behavior) *Interactor {
 	return &Interactor{
-		repo: repo,
-		auth: auth,
+		userBehavior: userBehavior,
 	}
 }
 
-func (i *Interactor) GetUserByLogin(ctx context.Context, login string) (userdomain.User, error) {
-	return i.repo.GetUser(ctx, login)
+func (i *Interactor) AddUser(ctx context.Context, user domainUser.User) error {
+	if err := i.validateCreateUser(ctx, user); err != nil {
+		return err
+	}
+
+	if err := i.userBehavior.Authorize(ctx, user); err != nil {
+		return err
+	}
+
+	return i.userBehavior.Repo().AddUser(ctx, user)
 }
 
-func (i *Interactor) AddUser(ctx context.Context, user userdomain.User) error {
-	if err := i.validateUser(user); err != nil {
+func (i *Interactor) UpdateUser(ctx context.Context, user domainUser.UpdateUser) error {
+	if err := i.validateUpdateUser(ctx, user); err != nil {
 		return err
 	}
 
-	_, err := i.repo.GetUser(ctx, user.Login)
-	if err == nil {
-		return userdomain.ErrUserExists
-	}
-
-	if !errors.Is(err, userdomain.ErrNotFound) {
-		return err
-	}
-
-	if err := i.auth.AuthorizeUser(ctx, user); err != nil {
-		if errors.Is(err, sutclient.ErrBadUser) {
-			return userdomain.ErrBadUser
-		}
-
-		return err
-	}
-
-	return i.repo.AddUser(ctx, user)
-}
-
-func (i *Interactor) UpdateUser(ctx context.Context, user userdomain.UpdateUser) error {
-	if err := i.validateUpdateRequest(user); err != nil {
-		return err
-	}
-
-	dbUser, err := i.GetUserByLogin(ctx, user.Login)
-	if err != nil {
-		return err
-	}
-
-	if dbUser.Login != user.Login || dbUser.Password != user.OldPassword {
-		return userdomain.ErrNotFound
-	}
-
-	if dbUser.Password == user.NewPassword {
+	if user.OldPassword == user.NewPassword {
 		return nil
 	}
 
-	newUser := userdomain.User{
+	newUser := domainUser.User{
 		Login:    user.Login,
 		Password: user.NewPassword,
 	}
 
-	if err := i.auth.AuthorizeUser(ctx, newUser); err != nil {
-		if errors.Is(err, sutclient.ErrBadUser) {
-			return userdomain.ErrBadUser
-		}
-
+	if err := i.userBehavior.Authorize(ctx, newUser); err != nil {
 		return err
 	}
 
-	return i.repo.AddUser(ctx, newUser)
+	return i.userBehavior.Repo().AddUser(ctx, newUser)
 }
 
-func (i *Interactor) DeleteUser(ctx context.Context, user userdomain.User) error {
-	if err := i.validateUser(user); err != nil {
+func (i *Interactor) DeleteUser(ctx context.Context, user domainUser.User) error {
+	if err := i.validateDeleteUser(ctx, user); err != nil {
 		return err
 	}
 
-	dbUser, err := i.GetUserByLogin(ctx, user.Login)
-	if err != nil {
-		return err
-	}
-
-	if dbUser.Login != user.Login || dbUser.Password != user.Password {
-		return userdomain.ErrNotFound
-	}
-
-	if err := i.repo.DeleteUser(ctx, user); err != nil {
-		return err
-	}
-
-	return i.repo.DeleteUserLastLogin(ctx, user.Login)
+	return i.userBehavior.Repo().DeleteUser(ctx, user)
 }

@@ -1,6 +1,9 @@
 package testutils
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 const (
 	RedisHashTableData  = "test_redis_table_data"
@@ -13,6 +16,8 @@ const (
 	BadUserResponse    = `{"result":null,"error":"wrong login or password"}`
 	UserExistsResponse = `{"result":null,"error":"user with same login exists"}`
 	NotFoundResponse   = `{"result":null,"error":"entity not found"}`
+
+	WorkerCommitInterval = 200 * time.Millisecond
 )
 
 func MakeUserBody() string {

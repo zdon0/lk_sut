@@ -3,14 +3,13 @@ package user
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/redis/go-redis/v9"
+
 	"lk_sut/internal/config"
 	"lk_sut/internal/domain"
-	"time"
-)
-
-const (
-	timeLayout = time.RFC3339
+	"lk_sut/internal/domain/user"
 )
 
 type Repo struct {
@@ -19,45 +18,43 @@ type Repo struct {
 	userLastLoginHTable string
 }
 
-func NewRepo(rdb *redis.Client, cfg config.Redis) *Repo {
+func NewRepo(rdb *redis.Client, cfg *config.Config) *Repo {
 	return &Repo{
 		rdb:                 rdb,
-		userDataHTable:      cfg.UserDataHTable,
-		userLastLoginHTable: cfg.UserLastLoginHTable,
+		userDataHTable:      cfg.Redis.UserDataHTable,
+		userLastLoginHTable: cfg.Redis.UserLastLoginHTable,
 	}
 }
 
-func (r *Repo) GetAllUsers(ctx context.Context) ([]domain.User, error) {
+func (r *Repo) GetAllUsers(ctx context.Context) ([]user.User, error) {
 	res, err := r.rdb.HGetAll(ctx, r.userDataHTable).Result()
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]domain.User, 0, len(res))
+	result := make([]user.User, 0, len(res))
 
 	for key, value := range res {
-		user := domain.User{
+		result = append(result, user.User{
 			Login:    key,
 			Password: value,
-		}
-
-		result = append(result, user)
+		})
 	}
 
 	return result, nil
 }
 
-func (r *Repo) GetUser(ctx context.Context, login string) (domain.User, error) {
+func (r *Repo) GetUser(ctx context.Context, login string) (user.User, error) {
 	res, err := r.rdb.HGet(ctx, r.userDataHTable, login).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return domain.User{}, domain.ErrNotFound
+			return user.User{}, domain.ErrNotFound
 		}
 
-		return domain.User{}, err
+		return user.User{}, err
 	}
 
-	result := domain.User{
+	result := user.User{
 		Login:    login,
 		Password: res,
 	}
@@ -65,16 +62,16 @@ func (r *Repo) GetUser(ctx context.Context, login string) (domain.User, error) {
 	return result, nil
 }
 
-func (r *Repo) AddUser(ctx context.Context, user domain.User) error {
+func (r *Repo) AddUser(ctx context.Context, user user.User) error {
 	return r.rdb.HSet(ctx, r.userDataHTable, user.Login, user.Password).Err()
 }
 
-func (r *Repo) DeleteUser(ctx context.Context, user domain.User) error {
+func (r *Repo) DeleteUser(ctx context.Context, user user.User) error {
 	return r.rdb.HDel(ctx, r.userDataHTable, user.Login).Err()
 }
 
 func (r *Repo) GetUserLastLogin(ctx context.Context, login string) (time.Time, error) {
-	res, err := r.rdb.HGet(ctx, r.userLastLoginHTable, login).Result()
+	res, err := r.rdb.HGet(ctx, r.userLastLoginHTable, login).Int64()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return time.Time{}, domain.ErrNotFound
@@ -83,16 +80,11 @@ func (r *Repo) GetUserLastLogin(ctx context.Context, login string) (time.Time, e
 		return time.Time{}, err
 	}
 
-	parsedTime, err := time.Parse(timeLayout, res)
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	return parsedTime, nil
+	return time.Unix(0, res), nil
 }
 
 func (r *Repo) SetUserLastLogin(ctx context.Context, login string, timeToSet time.Time) error {
-	return r.rdb.HSet(ctx, r.userLastLoginHTable, login, timeToSet.Format(timeLayout)).Err()
+	return r.rdb.HSet(ctx, r.userLastLoginHTable, login, timeToSet.UnixNano()).Err()
 }
 
 func (r *Repo) DeleteUserLastLogin(ctx context.Context, login string) error {

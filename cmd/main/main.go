@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"lk_sut/internal/app"
+	"go.uber.org/fx"
+
+	"lk_sut/internal/di"
 )
 
 // @title           Lk SUT Autocommitter
@@ -11,7 +12,5 @@ import (
 // @contact.url		https://t.me/don101
 
 func main() {
-	if err := app.Run(); err != nil {
-		fmt.Println(err)
-	}
+	fx.New(di.CreateApp()).Run()
 }

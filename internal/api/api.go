@@ -1,20 +1,19 @@
 package api
 
 import (
-	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
+
 	_ "lk_sut/docs" // gin swagger
+	"lk_sut/internal/api/handler/user"
 	"lk_sut/internal/config"
-	"lk_sut/internal/env"
-	"net/http"
 )
 
-func NewApi(cfg *config.Config, e *env.Env, logger *zap.Logger) *http.Server {
-	addr := fmt.Sprintf("%s:%d", cfg.Api.Addr, cfg.Api.Port)
-
+func NewApi(cfg *config.Config, logger *zap.Logger, userHandler *user.Handler) *gin.Engine {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -24,13 +23,9 @@ func NewApi(cfg *config.Config, e *env.Env, logger *zap.Logger) *http.Server {
 	apiV1group := handler.Group("/api/v1")
 
 	registerDefaultRoutes(handler)
-	registerUserRoutes(apiV1group, e)
+	registerUserRoutes(apiV1group, userHandler)
 
-	return &http.Server{
-		Addr:              addr,
-		Handler:           handler,
-		ReadHeaderTimeout: cfg.Api.ReadHeaderTimeout,
-	}
+	return handler
 }
 
 func newGinEngine(logger *zap.Logger) *gin.Engine {
@@ -55,10 +50,10 @@ func registerDefaultRoutes(r *gin.Engine) {
 	r.GET("/ready", simpleOkHandler)
 }
 
-func registerUserRoutes(api *gin.RouterGroup, e *env.Env) {
-	api.POST("/user", e.User.AddUser)
-	api.PATCH("/user", e.User.UpdateUser)
-	api.DELETE("/user", e.User.DeleteUser)
+func registerUserRoutes(api *gin.RouterGroup, h *user.Handler) {
+	api.POST("/user", h.AddUser)
+	api.PATCH("/user", h.UpdateUser)
+	api.DELETE("/user", h.DeleteUser)
 }
 
 func simpleOkHandler(c *gin.Context) {

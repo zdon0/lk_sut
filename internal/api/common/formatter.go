@@ -1,12 +1,14 @@
 package common
 
 import (
-	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+
 	"lk_sut/internal/domain"
+	domainUser "lk_sut/internal/domain/user"
 	"lk_sut/pkg/dto"
-	"net/http"
 )
 
 func MakeSimpleOkResponse(c *gin.Context) {
@@ -32,11 +34,11 @@ func MakeErrorResponse(c *gin.Context, err error) {
 		return
 	}
 
-	switch {
-	case errors.Is(err, domain.ErrBadUser), errors.Is(err, domain.ErrUserExists):
+	switch err {
+	case domainUser.ErrBadUser, domainUser.ErrUserExists:
 		c.JSON(http.StatusBadRequest, resp)
 		return
-	case errors.Is(err, domain.ErrNotFound):
+	case domain.ErrNotFound:
 		c.JSON(http.StatusNotFound, resp)
 		return
 	}

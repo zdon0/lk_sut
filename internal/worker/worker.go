@@ -2,62 +2,80 @@ package worker
 
 import (
 	"context"
-	"github.com/go-co-op/gocron"
-	"go.uber.org/zap"
-	"lk_sut/internal/config"
 	"time"
+
+	"github.com/go-co-op/gocron/v2"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
+
+	"lk_sut/internal/config"
+	"lk_sut/internal/pkg/daystamp"
 )
 
-type Worker struct {
-	scheduler         *gocron.Scheduler
+type worker struct {
+	scheduler         gocron.Scheduler
 	committerInterval time.Duration
+
+	lessonStartList []daystamp.Stamp
+	lessonDuration  time.Duration
 
 	logger *zap.Logger
 
 	lkSut LkSutCommitter
 	repo  Repository
-
-	baseCtx context.Context
-	cancel  func()
 }
 
-func NewWorker(cfg config.Scheduler, lkSut LkSutCommitter, repo Repository, logger *zap.Logger) *Worker {
-	ctx, cancel := context.WithCancel(context.Background())
+func InitializeWorker(cfg *config.Config, lkSut LkSutCommitter, repo Repository, logger *zap.Logger, lc fx.Lifecycle) error {
+	scheduler, err := gocron.NewScheduler(
+		gocron.WithGlobalJobOptions(
+			gocron.WithSingletonMode(gocron.LimitModeWait),
+		),
+	)
+	if err != nil {
+		return err
+	}
 
-	return &Worker{
-		scheduler:         gocron.NewScheduler(time.UTC),
-		committerInterval: cfg.CommitterInterval,
+	w := worker{
+		scheduler:         scheduler,
+		committerInterval: cfg.Scheduler.CommitterInterval,
+		lessonStartList:   cfg.Lesson.StartList,
+		lessonDuration:    cfg.Lesson.Duration,
 		logger:            logger,
 		lkSut:             lkSut,
 		repo:              repo,
-		baseCtx:           ctx,
-		cancel:            cancel,
 	}
+
+	if err := w.registerJobs(); err != nil {
+		return err
+	}
+
+	lc.Append(fx.Hook{
+		OnStart: w.Start,
+		OnStop:  w.Stop,
+	})
+
+	return nil
 }
 
-func (w *Worker) Start() {
+func (w *worker) Start(_ context.Context) error {
 	w.logger.Info(workerMsg,
 		zap.String(actionField, "worker started"))
 
-	w.scheduler.StartBlocking()
+	w.scheduler.Start()
+
+	return nil
 }
 
-func (w *Worker) StartAsync() {
-	w.logger.Info(workerMsg,
-		zap.String(actionField, "worker started"))
-
-	w.scheduler.StartAsync()
-}
-
-func (w *Worker) Stop() {
-	w.cancel()
-	w.scheduler.Stop()
+func (w *worker) Stop(_ context.Context) error {
+	err := w.scheduler.Shutdown()
 
 	w.logger.Info(workerMsg,
 		zap.String(actionField, "worker stopped"))
+
+	return err
 }
 
-func (w *Worker) RegisterJobs() error {
+func (w *worker) registerJobs() error {
 	if err := w.registerCommitterJob(); err != nil {
 		return err
 	}
@@ -65,20 +83,24 @@ func (w *Worker) RegisterJobs() error {
 	return w.registerFlusherJob()
 }
 
-func (w *Worker) registerCommitterJob() error {
-	_, err := w.scheduler.
-		Every(w.committerInterval).
-		SingletonMode().
-		Do(comitterFunc(w.lkSut, w.repo, w.logger), w.baseCtx)
+func (w *worker) registerCommitterJob() error {
+	_, err := w.scheduler.NewJob(
+		gocron.DurationJob(w.committerInterval),
+		gocron.NewTask(w.commit),
+	)
 
 	return err
 }
 
-func (w *Worker) registerFlusherJob() error {
-	_, err := w.scheduler.
-		Every(1).Day().At("00:00").
-		SingletonMode().
-		Do(flusherFunc(w.repo, w.logger), w.baseCtx)
+func (w *worker) registerFlusherJob() error {
+	_, err := w.scheduler.NewJob(
+		gocron.DailyJob(1,
+			gocron.NewAtTimes(
+				gocron.NewAtTime(0, 0, 0),
+			),
+		),
+		gocron.NewTask(w.flush),
+	)
 
 	return err
 }

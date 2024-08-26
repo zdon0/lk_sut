@@ -1,9 +1,6 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -11,6 +8,10 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func defaultZapLogger(logger *zap.Logger, pathPrefixes ...string) gin.HandlerFunc {
@@ -23,11 +24,11 @@ func defaultZapLogger(logger *zap.Logger, pathPrefixes ...string) gin.HandlerFun
 			}
 		}
 
-		start := time.Now().UTC()
+		start := time.Now()
 
 		c.Next()
 
-		end := time.Now().UTC()
+		end := time.Now()
 		latency := end.Sub(start)
 
 		fields := []zapcore.Field{

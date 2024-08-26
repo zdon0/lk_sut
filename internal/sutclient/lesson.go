@@ -3,10 +3,11 @@ package sutclient
 import (
 	"context"
 	"errors"
-	"lk_sut/internal/pkg/decoder"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"lk_sut/internal/pkg/decoder"
 )
 
 const (
@@ -36,12 +37,7 @@ func (sc *SutClient) getSchedule(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	schedule, err := decoder.Decode(resp.String())
-	if err != nil {
-		return "", err
-	}
-
-	return schedule, nil
+	return decoder.Decode(resp.String())
 }
 
 func (sc *SutClient) openLesson(ctx context.Context, schedule string) error {
@@ -56,8 +52,6 @@ func (sc *SutClient) openLesson(ctx context.Context, schedule string) error {
 			if !strings.Contains(schedule, noButtonOnCurrentLesson) {
 				return nil
 			}
-
-			return err
 		}
 
 		return err

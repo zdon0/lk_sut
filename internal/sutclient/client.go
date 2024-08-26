@@ -2,11 +2,13 @@ package sutclient
 
 import (
 	"context"
-	"github.com/go-resty/resty/v2"
-	"golang.org/x/net/publicsuffix"
-	"lk_sut/internal/config"
 	"net/http/cookiejar"
 	"sync"
+
+	"github.com/go-resty/resty/v2"
+	"golang.org/x/net/publicsuffix"
+
+	"lk_sut/internal/config"
 )
 
 type SutClient struct {
@@ -14,10 +16,10 @@ type SutClient struct {
 	mutex  sync.Mutex
 }
 
-func NewClient(cfg config.LkSutService) *SutClient {
+func NewClient(cfg *config.Config) *SutClient {
 	restyClient := resty.New().
-		SetBaseURL(cfg.URL).
-		SetTimeout(cfg.Timeout).
+		SetBaseURL(cfg.LkSutService.URL).
+		SetTimeout(cfg.LkSutService.Timeout).
 		OnAfterResponse(afterResponse)
 
 	return &SutClient{

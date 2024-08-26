@@ -1,25 +1,24 @@
-version: "3.9"
+volumes:
+  db-data:
 
 services:
   db:
-    container_name: redis
-    image: redis/redis-stack-server:7.2.0-v2
-    environment:
-      - REDIS_ARGS=--save 50 60 --appendonly yes --requirepass ${REDIS_PASSWORD}
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
-      - /apps/volumes/redis-data:/data
+      - db-data:/data
     restart: unless-stopped
 
   app:
-    container_name: lk_sut
     build: .
     environment:
-      - REDIS_HOST=redis
+      - REDIS_HOST=db
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - APP_DEBUG=${APP_DEBUG}
       - API_PORT=${API_PORT}
     ports:
       - "${API_PORT}:${API_PORT}"
     depends_on:
-      - db
+      db:
+        condition: service_started
     restart: unless-stopped

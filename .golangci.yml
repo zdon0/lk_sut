@@ -1,4 +1,12 @@
 run:
   timeout: 5m
-  fix: true
-  go: '1.19'
+  go: '1.23'
+linters:
+  enable:
+    - gci
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(lk_sut)

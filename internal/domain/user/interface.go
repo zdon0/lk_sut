@@ -1,17 +1,6 @@
-package domain
+package user
 
 import "context"
-
-type User struct {
-	Login    string
-	Password string
-}
-
-type UpdateUser struct {
-	Login       string
-	OldPassword string
-	NewPassword string
-}
 
 type Repository interface {
 	GetUser(ctx context.Context, login string) (User, error)
@@ -21,5 +10,5 @@ type Repository interface {
 }
 
 type Authorization interface {
-	AuthorizeUser(ctx context.Context, user User) error
+	AuthorizeUser(ctx context.Context, login, password string) error
 }

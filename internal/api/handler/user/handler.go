@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"lk_sut/internal/api/common"
 	"lk_sut/internal/interactor/user"
 	"lk_sut/pkg/dto"

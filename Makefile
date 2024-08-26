@@ -11,7 +11,7 @@ docs:
 
 .PHONY: lint
 lint:
-	golangci-lint run ./...
+	golangci-lint run --fix ./...
 
 .PHONY: tidy
 tidy:
@@ -20,10 +20,10 @@ tidy:
 .PHONY: prepare
 prepare: tidy lint test docs
 
-.PHONY: compose-up
-compose-up:
-	docker compose up --build -d
+.PHONY: up
+up:
+	docker compose up --build --wait
 
-.PHONY: compose-down
-compose-down:
-	docker compose down --remove-orphans
+.PHONY: down
+down:
+	docker compose down

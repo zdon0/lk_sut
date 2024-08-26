@@ -1,8 +1,11 @@
 package config
 
 import (
-	"github.com/caarlos0/env/v9"
 	"time"
+
+	"github.com/caarlos0/env/v9"
+
+	"lk_sut/internal/pkg/daystamp"
 )
 
 type Config struct {
@@ -10,6 +13,7 @@ type Config struct {
 	LkSutService LkSutService
 	Scheduler    Scheduler
 	Redis        Redis
+	Lesson       Lesson
 	Debug        bool `env:"APP_DEBUG" envDefault:"true"`
 }
 
@@ -21,7 +25,7 @@ type Api struct {
 
 type LkSutService struct {
 	URL     string        `env:"LK_SUT_URL" envDefault:"https://lk.sut.ru"`
-	Timeout time.Duration `env:"LK_SUT_TIMEOUT," envDefault:"10s"`
+	Timeout time.Duration `env:"LK_SUT_TIMEOUT" envDefault:"10s"`
 }
 
 type Scheduler struct {
@@ -38,12 +42,18 @@ type Redis struct {
 	UserLastLoginHTable string        `env:"REDIS_USER_LOGIN_TABLE" envDefault:"lk-sut:user:login"`
 }
 
-func NewConfig() *Config {
+type Lesson struct {
+	Timezone  string           `env:"LESSON_TIMEZONE" envDefault:"Europe/Moscow"`
+	Duration  time.Duration    `env:"LESSON_DURATION" envDefault:"1h35m"`
+	StartList []daystamp.Stamp `env:"LESSON_START_LIST" envDefault:"9:00,10:45,13:00,14:45,16:30,18:15"`
+}
+
+func NewConfig() (*Config, error) {
 	var res Config
 
 	if err := env.Parse(&res); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return &res
+	return &res, nil
 }

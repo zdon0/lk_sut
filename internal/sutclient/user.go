@@ -2,7 +2,6 @@ package sutclient
 
 import (
 	"context"
-	"lk_sut/internal/domain"
 	"net/url"
 )
 
@@ -16,11 +15,11 @@ func (sc *SutClient) initUser(ctx context.Context) error {
 	return err
 }
 
-func (sc *SutClient) authUser(ctx context.Context, user domain.User) error {
+func (sc *SutClient) authUser(ctx context.Context, login, password string) error {
 	formData := make(url.Values, 2)
 
-	formData.Set("users", user.Login)
-	formData.Set("parole", user.Password)
+	formData.Set("users", login)
+	formData.Set("parole", password)
 
 	_, err := sc.r(ctx).
 		SetFormDataFromValues(formData).
@@ -29,7 +28,7 @@ func (sc *SutClient) authUser(ctx context.Context, user domain.User) error {
 	return err
 }
 
-func (sc *SutClient) AuthorizeUser(ctx context.Context, user domain.User) error {
+func (sc *SutClient) AuthorizeUser(ctx context.Context, login, password string) error {
 	// goroutine user validation in handlers
 	sc.mutex.Lock()
 	defer sc.mutex.Unlock()
@@ -38,5 +37,5 @@ func (sc *SutClient) AuthorizeUser(ctx context.Context, user domain.User) error 
 		return err
 	}
 
-	return sc.authUser(ctx, user)
+	return sc.authUser(ctx, login, password)
 }
