@@ -3,8 +3,9 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
+	"net"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -15,7 +16,7 @@ import (
 
 func InitializeServer(cfg *config.Config, logger *zap.Logger, api *gin.Engine, shutdowner fx.Shutdowner, lc fx.Lifecycle) {
 	srv := &http.Server{
-		Addr:              fmt.Sprintf("%s:%d", cfg.Api.Addr, cfg.Api.Port),
+		Addr:              net.JoinHostPort(cfg.Api.Addr, strconv.Itoa(cfg.Api.Port)),
 		ReadHeaderTimeout: cfg.Api.ReadHeaderTimeout,
 		Handler:           api,
 	}

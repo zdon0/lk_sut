@@ -24,8 +24,9 @@ type Api struct {
 }
 
 type LkSutService struct {
-	URL     string        `env:"LK_SUT_URL" envDefault:"https://lk.sut.ru"`
-	Timeout time.Duration `env:"LK_SUT_TIMEOUT" envDefault:"10s"`
+	URL        string        `env:"LK_SUT_URL" envDefault:"https://lk.sut.ru"`
+	Timeout    time.Duration `env:"LK_SUT_TIMEOUT" envDefault:"10s"`
+	RetryCount int           `env:"LK_SUT_RETRY_COUNT" envDefault:"5"`
 }
 
 type Scheduler struct {

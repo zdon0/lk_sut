@@ -22,6 +22,10 @@ func NewClient(cfg *config.Config) *SutClient {
 		SetTimeout(cfg.LkSutService.Timeout).
 		OnAfterResponse(afterResponse)
 
+	if cfg.LkSutService.RetryCount > 1 {
+		restyClient = restyClient.SetRetryCount(cfg.LkSutService.RetryCount)
+	}
+
 	return &SutClient{
 		client: restyClient,
 	}
